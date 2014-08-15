@@ -16,10 +16,13 @@ Requirements:
 * Working memcached server
 
 
-Using
+Installation
 ----
-
-To install:
 ```
 pip install txcaching
 ```
+
+Using
+----
+
+Will be added later. For now, see [examples](https://github.com/alexgorin/txcaching/tree/master/examples)
