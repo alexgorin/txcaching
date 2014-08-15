@@ -2,7 +2,7 @@
 txcaching
 =====
 
-txcaching is a library that makes operations with mamcached in Twisted applications much easier.
+txcaching is a library that makes operations with memcached in Twisted applications much easier.
 For many cases just a few lines of code will allow you to cache your methods or services.
 
 Version:
