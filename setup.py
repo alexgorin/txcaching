@@ -26,6 +26,6 @@ setup(
           'twisted',
     ],
     keywords=[
-        'python', 'twisted', 'cache', 'caching'
-    ]
+        'python', 'twisted', 'cache',
+    ],
 )
