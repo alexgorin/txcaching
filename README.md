@@ -13,7 +13,6 @@ Requirements:
 -------------
 * Python 2.7
 * Twisted 13
-* [pika](https://pypi.python.org/pypi/pika)
 * Working memcached server
 
 
