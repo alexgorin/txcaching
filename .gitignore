@@ -1,4 +1,7 @@
 
 build/*
 .idea/*
+./txcaching/docs/*
+_trial_temp/*
 *.pyc
+post.txt

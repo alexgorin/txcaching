@@ -104,6 +104,7 @@ class DB:
 
 db = DB()
 
+
 class Getter(Resource):
     def getChild(self, path, request):
         return EmailGetter(path)

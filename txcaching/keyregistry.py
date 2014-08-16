@@ -6,13 +6,13 @@ import cPickle as pickle
 _REGISTRY = {}
 
 
-def serialize(args, kwargs):
+def _serialize(args, kwargs):
     """Serialize arguments"""
 
     return pickle.dumps((args, kwargs))
 
 
-def deserialize(dump):
+def _deserialize(dump):
     """Deserialize arguments"""
 
     return pickle.loads(dump)
@@ -31,10 +31,17 @@ def all():
 
 
 def register(key, func, args=(), kwargs={}, class_name=""):
-    """Add function call to the registry"""
+    """Add function call to the registry
+
+    :param str key: cache key
+    :param func: function to cache
+    :param tuple args: function arguments
+    :param dict kwargs: function keyword arguments
+    :param class_name: If the function is a method, name of class of the object must be set up.
+    """
 
     func = func_id(func, class_name=class_name)
-    args_dump = serialize(args, kwargs)
+    args_dump = _serialize(args, kwargs)
 
     if func not in _REGISTRY:
         _REGISTRY[func] = []
@@ -47,7 +54,7 @@ def register(key, func, args=(), kwargs={}, class_name=""):
 
 
 def remove(func):
-    """Remove function from registry"""
+    """Remove function from registry with all the keys associated with it."""
 
     func = func_id(func)
     del _REGISTRY[func]
@@ -71,7 +78,7 @@ def key(func, args=(), kwargs={}):
     if func not in _REGISTRY:
         return None
 
-    keys = [item["key"] for item in _REGISTRY[func] if item["args"] == serialize(args, kwargs)]
+    keys = [item["key"] for item in _REGISTRY[func] if item["args"] == _serialize(args, kwargs)]
     if not keys:
         return None
     return keys[0]
