@@ -3,7 +3,7 @@ txcaching
 =====
 
 txcaching is a library that makes operations with memcached in Twisted applications much easier.
-The operations in Twisted is rather specific due to its asynchronous nature; but using this library, 
+The operations in Twisted are rather specific due to its asynchronous nature; but using this library,
 for many cases just a few lines of code will allow you to cache your methods calls or services.
 
 
