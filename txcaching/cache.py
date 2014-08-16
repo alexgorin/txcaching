@@ -138,7 +138,7 @@ def cache_sync_render_GET(expireTime=0, redundant_args=(), exclude_self=False, c
     :param expireTime:
         The lifetime of the cache key. If set to 0, lifetime is not limited.
     :param redundant_args:
-        Request arguments we want to ignore. For example, ExtJS generates the arbitrary argument _dc to prevent
+        Request arguments we want to ignore. For example, ExtJS generates the random argument _dc to prevent
         browser caching. We can get rid of it using redundant_args=("_dc",)
     :param exclude_self:
         If it is true, the state of resource object will not be used to create cache key. If it is set to false,
@@ -193,7 +193,7 @@ def cache_async_render_GET(expireTime=0, redundant_args=(), exclude_self=False, 
     :param expireTime:
         The lifetime of the cache key. If set to 0, lifetime is not limited.
     :param redundant_args:
-        Request arguments we want to ignore. For example, ExtJS generates the arbitrary argument _dc to prevent
+        Request arguments we want to ignore. For example, ExtJS generates the random argument _dc to prevent
         browser caching. We can get rid of it using redundant_args=("_dc",)
     :param exclude_self:
         If it is true, the state of resource object will not be used to create cache key. If it is set to false,
