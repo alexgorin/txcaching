@@ -46,7 +46,7 @@ cache.load_config(**{"disable": False, "ip": "127.0.0.1", "port": 11212})
 Also with this function you can disable caching in you application. Be careful: caching is disabled by default.
 
 Module txcaching.cache provides 3 decorators to cache the calls of various types of functions:
-* `cache.cache` - caches the output of a function. The function may be either blocking or asynchronous - after decoration it will be asynchronous anyway. It may seem strange, bacause decorators don't usually affect the behaviour of functions that way. But if you need to cache your function calls, it usually means that it is an important part of your architecture and a potential bottleneck, so it is not cool to add there a blocking call to an external server. This decorator may be used with methods as well as with functions, but if you use it with a method, you must provide the name of the class in `class_name` argument.
+* `cache.cache` - caches the output of a function. The function may be either blocking or asynchronous - after decoration it will be asynchronous anyway. It may seem strange, because decorators don't usually affect the behaviour of functions that way. But if you need to cache your function calls, it usually means that it is an important part of your architecture and a potential bottleneck, so it is not cool to add there a blocking call to an external server. This decorator may be used with methods as well as with functions, but if you use it with a method, you must provide the name of the class in `class_name` argument.
 * `cache.cache_sync_render_GET` -caches the output of render_GET method of Resource subclass. The method must return a string - not server.NOT_DONE_YET constant.
 * `cache.cache_async_render_GET` -caches the output of render_GET method of Resource subclass. The method must return a server.NOT_DONE_YET constant.
 
@@ -92,9 +92,6 @@ In the second [example](https://github.com/alexgorin/txcaching/blob/master/examp
 ```python
 class EmailGetter(Resource):
     def __init__(self, username):
-        self.children = {
-            "": self
-        }
         self.username = username
 
     @cache.cache_async_render_GET(class_name="EmailGetter")
@@ -124,7 +121,7 @@ class EmailSetter(Resource):
         return email_set_confirmation % (username, email)
 ```
 
-`EmailGetter.render_GET` is cached by `cache_async_render_GET`, so its results will be cached. Note that in this case the result will depend on the state of Resource object (`self.username` field), so we don't set ```exclude_self=True``` in `cache_async_render_GET`.
+`EmailGetter.render_GET` is decorated by `cache_async_render_GET`, so its results will be cached. Note that in this case the result will depend on the state of Resource object (`self.username` field), so we don't set ```exclude_self=True``` in `cache_async_render_GET`.
 `EmailSetter.render_POST` checks if the value corresponding to the username has been cached using `keyregistry.key` and drops the cache corresponding to the particular username.
 
 To work with cached data you may also use other functions provided by module `cache`: get(), set(), append(), flushAll() etc.

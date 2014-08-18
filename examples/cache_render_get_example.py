@@ -107,9 +107,6 @@ class Getter(Resource):
 
 class EmailGetter(Resource):
     def __init__(self, username):
-        self.children = {
-            "": self
-        }
         self.username = username
 
     @cache.cache_async_render_GET(class_name="EmailGetter")

@@ -13,7 +13,7 @@ from distutils.core import setup
 
 setup(
     name='txcaching',
-    version="0.1",
+    version="0.2",
     description="Library for easy caching of twisted functions.",
     url="https://github.com/alexgorin/txcaching",
     author="Alexander Gorin",

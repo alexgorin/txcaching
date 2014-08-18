@@ -112,9 +112,6 @@ class Getter(Resource):
 
 class EmailGetter(Resource):
     def __init__(self, username):
-        self.children = {
-            "": self
-        }
         self.username = username
 
     def render_GET(self, request):
