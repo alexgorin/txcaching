@@ -124,7 +124,7 @@ class EmailSetter(Resource):
 `EmailGetter.render_GET` is decorated by `cache_async_render_GET`, so its results will be cached. Note that in this case the result will depend on the state of Resource object (`self.username` field), so we don't set ```exclude_self=True``` in `cache_async_render_GET`.
 `EmailSetter.render_POST` checks if the value corresponding to the username has been cached using `keyregistry.key` and drops the cache corresponding to the particular username.
 
-The third [example](https://github.com/alexgorin/txcaching/blob/master/examples/cache_render_get_example.py) shows the same approach, but with reading the request
+The third [example](https://github.com/alexgorin/txcaching/blob/master/examples/cache_render_get_with_args_example.py) shows the same approach, but with reading the request
 arguments instead of dynamic URL processing. In addition, in this example we ignore an argument ('_dc') that we don't want to process.
 
 ```python
