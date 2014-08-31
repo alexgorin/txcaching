@@ -9,7 +9,7 @@ for many cases just a few lines of code will allow you to cache your methods cal
 
 Version:
 -------
-0.1
+0.3
 
 Requirements:
 -------------
@@ -123,6 +123,42 @@ class EmailSetter(Resource):
 
 `EmailGetter.render_GET` is decorated by `cache_async_render_GET`, so its results will be cached. Note that in this case the result will depend on the state of Resource object (`self.username` field), so we don't set ```exclude_self=True``` in `cache_async_render_GET`.
 `EmailSetter.render_POST` checks if the value corresponding to the username has been cached using `keyregistry.key` and drops the cache corresponding to the particular username.
+
+The third [example](https://github.com/alexgorin/txcaching/blob/master/examples/cache_render_get_example.py) shows the same approach, but with reading the request
+arguments instead of dynamic URL processing. In addition, in this example we ignore an argument ('_dc') that we don't want to process.
+
+```python
+
+class EmailGetter(Resource):
+
+    @cache.cache_async_render_GET(class_name="EmailGetter", redundant_args=("_dc",), exclude_self=True)
+    def render_GET(self, request):
+
+        username = request.args.get("username", [""])[0]
+        d = DB.get(username)
+        d.addCallback(lambda email: request.write(email_response % email))
+        d.addErrback(lambda failure: request.write(email_not_found % username))
+        d.addBoth(lambda _: request.finish())
+
+        return server.NOT_DONE_YET
+
+
+class EmailSetter(Resource):
+    def render_GET(self, request):
+        return set_email
+
+    def render_POST(self, request):
+        username = request.args.get("username", [""])[0]
+        email = request.args.get("email", [""])[0]
+
+        cache_key = keyregistry.key(EmailGetter.render_GET, kwargs={"username": [username]})
+        if cache_key:
+            cache.delete(cache_key)
+
+        DB.set(username, email)
+        return email_set_confirmation % (username, email)
+```
+
 
 To work with cached data you may also use other functions provided by module `cache`: get(), set(), append(), flushAll() etc.
 
