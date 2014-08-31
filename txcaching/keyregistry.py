@@ -2,6 +2,7 @@
 
 import copy
 import cPickle as pickle
+import json
 
 _REGISTRY = {}
 
@@ -25,9 +26,20 @@ def func_id(func, class_name=""):
 
 
 def all():
-    """Get copy of the registry. For debug only."""
-
-    return copy.deepcopy(_REGISTRY)
+    """Get readable copy of the registry. For debug only."""
+    return json.dumps([
+        {
+            "function": func_id,
+            "info": [
+                {
+                    "key": info_item["key"],
+                    "args": pickle.loads(info_item["args"])
+                }
+                for info_item in info
+            ]
+        }
+        for func_id, info in _REGISTRY.iteritems()
+    ], indent=4)
 
 
 def register(key, func, args=(), kwargs={}, class_name=""):
@@ -62,8 +74,10 @@ def remove(func):
 
 def keys(func):
     """All the keys which have been added by the function"""
-
-    func = func_id(func)
+    
+    klass = getattr(func, "im_class", None)
+    class_name = getattr(klass, "__name__", "")
+    func = func_id(func, class_name)
     if func not in _REGISTRY:
         return []
     return [item["key"] for item in _REGISTRY[func]]
@@ -77,7 +91,7 @@ def key(func, args=(), kwargs={}):
     func = func_id(func, class_name=class_name)
     if func not in _REGISTRY:
         return None
-
+    
     keys = [item["key"] for item in _REGISTRY[func] if item["args"] == _serialize(args, kwargs)]
     if not keys:
         return None

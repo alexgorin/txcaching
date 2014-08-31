@@ -43,12 +43,16 @@ def _remove_args(url, args):
     return url
 
 
-def _register_key(success, proto, key, func, args, kwargs, exclude_self, class_name):
+def _register_key(success, proto, key, func, args, kwargs, exclude_self, class_name, redundant_args=()):
     """Put function call into registry."""
 
     if success:
         if exclude_self:
             args = args[1:]
+            
+        for arg in redundant_args:
+            del kwargs[arg]
+            
         keyregistry.register(key, func, args, kwargs, class_name)
 
     _close_connection(None, proto)
@@ -64,7 +68,7 @@ def _set_metadata(wrapper, func):
 
 def _create_key(request, redundant_args=()):
     """Forms key for caching from request arguments."""
-
+    
     uri = _remove_args(request.uri, redundant_args)
     return str(uri)
 
@@ -83,7 +87,7 @@ class RequestCachingWrapper(object):
     This class is not to be used directly.
     """
 
-    def __init__(self, request, cache_key, cache_proto, func, resource, expireTime=0, exclude_self=False, class_name=""):
+    def __init__(self, request, cache_key, cache_proto, func, resource, expireTime=0, exclude_self=False, class_name="", redundant_args=()):
         self.request = request
         self.cache_key = cache_key
         self.cache_proto = cache_proto
@@ -92,6 +96,7 @@ class RequestCachingWrapper(object):
         self.expireTime = expireTime
         self.exclude_self = exclude_self
         self.class_name = class_name
+        self.redundant_args = redundant_args
 
         self.stream = StringIO()
         self.error_occurred = False
@@ -121,14 +126,14 @@ class RequestCachingWrapper(object):
     def _write_to_cache(self):
         self.cache_proto.add(self.cache_key, str(self), expireTime=self.expireTime).\
             addCallback(_register_key, self.cache_proto, self.cache_key, self.func, (self.resource,),\
-                        self.request.args, self.exclude_self, self.class_name)
+                        self.request.args, self.exclude_self, self.class_name, self.redundant_args)
 
     def __str__(self):
         return self.stream.getvalue()
 
-    def __getattr__(self, item):
-        if not hasattr(self, item):
-            return getattr(self.request, item)
+    @property
+    def args(self):
+        return self.request.args
 
 
 def cache_sync_render_GET(expireTime=0, redundant_args=(), exclude_self=False, class_name=""):
@@ -165,7 +170,7 @@ def cache_sync_render_GET(expireTime=0, redundant_args=(), exclude_self=False, c
                     cache_key = _create_key(request, redundant_args=redundant_args)
                     value = read_without_cache(None)
                     proto.add(cache_key, value, expireTime=expireTime).\
-                        addCallback(_register_key, proto, cache_key, func, (self,), request.args, exclude_self, class_name=class_name).\
+                        addCallback(_register_key, proto, cache_key, func, (self,), request.args, exclude_self, class_name=class_name, redundant_args=redundant_args).\
                         addErrback(_close_connection, proto)
 
             def read_without_cache(_):
@@ -175,7 +180,7 @@ def cache_sync_render_GET(expireTime=0, redundant_args=(), exclude_self=False, c
                 return result
 
             def check_in_cache(proto):
-                return proto.get(_create_key(request)).addCallback(final, proto).addErrback(read_without_cache)
+                return proto.get(_create_key(request, redundant_args=redundant_args)).addCallback(final, proto).addErrback(read_without_cache)
 
             d.addCallbacks(check_in_cache, read_without_cache)
             return server.NOT_DONE_YET
@@ -224,12 +229,12 @@ def cache_async_render_GET(expireTime=0, redundant_args=(), exclude_self=False, 
                     caching_request = request
                 else:
                     caching_request = RequestCachingWrapper(request, cache_key, proto, func, self, expireTime=expireTime,\
-                                                            exclude_self=exclude_self, class_name=class_name)
+                                                            exclude_self=exclude_self, class_name=class_name, redundant_args=redundant_args)
 
                 return func(self, caching_request)
 
             def check_in_cache(proto):
-                return proto.get(_create_key(request)).addCallback(final, proto).addErrback(read_without_cache, None)
+                return proto.get(_create_key(request, redundant_args=redundant_args)).addCallback(final, proto).addErrback(read_without_cache, None)
 
             d.addCallbacks(check_in_cache, read_without_cache)
             return server.NOT_DONE_YET
